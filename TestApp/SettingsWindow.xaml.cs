@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using TestApp.Infrastructure;
 using TestApp.ViewModels;
 
 namespace TestApp;
@@ -10,15 +11,18 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        WindowHelper.FixMaximize(this);
         DataContext = _vm;
     }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void Close_Click(object sender, RoutedEventArgs e) { DialogResult = false; Close(); }
 
     private void Save_Click(object s, RoutedEventArgs e)
     {
         if (_vm.TimedTestMinutes <= 0 || _vm.TestQuestionCount <= 0)
         {
-            MessageBox.Show("Укажите положительные числа для времени и количества вопросов.",
-                "Проверка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Укажите положительные числа для времени и количества вопросов.", "Проверка", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -26,6 +30,10 @@ public partial class SettingsWindow : Window
         App.Settings.TestQuestionCount = _vm.TestQuestionCount;
         App.Settings.ShuffleAnswers = _vm.ShuffleAnswers;
         App.Settings.ShowExplanationImmediately = _vm.ShowExplanationImmediately;
+
+        // НОВОЕ: Сохраняем и применяем тему
+        App.Settings.Theme = _vm.IsDarkTheme ? "Dark" : "Light";
+        App.ApplyTheme(App.Settings.Theme);
 
         App.SettingsService.Save(App.Settings);
         DialogResult = true;

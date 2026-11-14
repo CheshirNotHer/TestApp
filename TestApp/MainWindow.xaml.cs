@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using TestApp.Infrastructure;
 using TestApp.Models;
 using TestApp.ViewModels;
 
@@ -11,6 +12,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        WindowHelper.FixMaximize(this);
         DataContext = _vm;
         _vm.RefreshTopics();
         _vm.RefreshLabels();
@@ -18,11 +20,14 @@ public partial class MainWindow : Window
         _vm.RequestOpenSettings += OpenSettings;
     }
 
+    private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void Maximize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
     private void StartTest(TestParameters p)
     {
         var test = new TestWindow(p) { Owner = this };
         test.ShowDialog();
-        // после закрытия настройки могли измениться
         _vm.RefreshLabels();
     }
 

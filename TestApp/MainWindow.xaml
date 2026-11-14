@@ -1,61 +1,111 @@
 ﻿<Window x:Class="TestApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Тестирование" Width="820" Height="640"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Тестирование" Width="850" Height="700"
         WindowStartupLocation="CenterScreen"
-        Background="#F5F7FA">
-    <Grid Margin="30">
+        WindowStyle="None"
+        Background="{DynamicResource BgColor}">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Тестирование по курсу" FontSize="26" FontWeight="Bold" Foreground="#1B2431"/>
-            <TextBlock Text="{Binding QuestionCountText}" Foreground="#6A7381" Margin="0,6,0,0"/>
-        </StackPanel>
+        <!-- Кастомный заголовок окна -->
+        <Grid Grid.Row="0" Background="Transparent">
+            <TextBlock Text="Платформа тестирования" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
 
-        <StackPanel Grid.Row="1" MaxWidth="640" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,8,0" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource WindowButton}" Click="Minimize_Click" ToolTip="Свернуть">
+                    <Path Data="M 0,0 L 10,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
+                </Button>
+                <Button Style="{StaticResource WindowButton}" Click="Maximize_Click" ToolTip="Развернуть">
+                    <Path Data="M 0,0 L 10,0 L 10,10 L 0,10 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
+                </Button>
+                <Button Style="{StaticResource CloseButton}" Click="Close_Click" ToolTip="Закрыть">
+                    <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
+                </Button>
+            </StackPanel>
+        </Grid>
 
-            <Button Content="1. Пройти все вопросы"
-                    Style="{StaticResource PrimaryButton}"
-                    Click="All_Click" Margin="0,0,0,10"/>
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" Margin="40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <Button Content="{Binding UniformButtonText}"
-        Style="{StaticResource SecondaryButton}"
-        Click="Uniform_Click" Margin="0,0,0,10"/>
-
-            <Button Content="{Binding RandomButtonText}"
-        Style="{StaticResource SecondaryButton}"
-        Click="Random_Click" Margin="0,0,0,10"/>
-
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="{Binding TimedButtonText}"
-        Style="{StaticResource SecondaryButton}"
-        Click="Timed_Click"/>
-                <TextBlock Text="{Binding TimedMinutesText}"
-                           VerticalAlignment="Center" Margin="14,0,0,0"
-                           Foreground="#6A7381"/>
+            <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                <TextBlock Text="Платформа тестирования" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextMain}"/>
+                <TextBlock Text="Выберите режим для начала проверки знаний" FontSize="16" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0"/>
+                <TextBlock Text="{Binding QuestionCountText}" FontSize="13" Foreground="{DynamicResource PrimaryColor}" FontWeight="SemiBold" Margin="0,12,0,0"/>
             </StackPanel>
 
-            <Separator Margin="0,10,0,10"/>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <TextBlock Text="5. Пройти все вопросы по выбранной теме:"
-                       FontWeight="SemiBold" Margin="0,0,0,6"/>
-            <StackPanel Orientation="Horizontal">
-                <ComboBox ItemsSource="{Binding Topics}"
-                          SelectedItem="{Binding SelectedTopic}"
-                          Width="360" Height="34" FontSize="14" Padding="6,4"/>
-                <Button Content="Начать тест по теме" Margin="10,0,0,0"
-                        Style="{StaticResource PrimaryButton}"
-                        Click="ByTopic_Click"/>
-            </StackPanel>
-        </StackPanel>
+                <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" Padding="20" Margin="0,0,10,10" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="1. Полный тест" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                        <TextBlock Text="Пройти все доступные вопросы из базы." FontSize="14" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                        <Button Content="Начать" Style="{StaticResource PrimaryButton}" Click="All_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,24,0,0">
-            <Button Content="⚙ Настройки" Style="{StaticResource SecondaryButton}"
-                    Click="Settings_Click"/>
-        </StackPanel>
+                <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="12" Padding="20" Margin="10,0,0,10" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding UniformButtonText}" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                        <TextBlock Text="Случайные вопросы, равномерно распределенные по всем темам." FontSize="14" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                        <Button Content="Начать" Style="{StaticResource PrimaryButton}" Click="Uniform_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource CardBg}" CornerRadius="12" Padding="20" Margin="0,10,10,10" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding RandomButtonText}" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                        <TextBlock Text="Случайная выборка вопросов без учета тем." FontSize="14" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                        <Button Content="Начать" Style="{StaticResource PrimaryButton}" Click="Random_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource CardBg}" CornerRadius="12" Padding="20" Margin="10,10,0,10" Effect="{StaticResource CardShadow}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding TimedButtonText}" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding TimedMinutesText}" FontSize="14" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                        <Button Content="Начать с таймером" Style="{StaticResource PrimaryButton}" Click="Timed_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Background="{DynamicResource CardBg}" CornerRadius="12" Padding="10" Margin="0,10,0,0" Effect="{StaticResource CardShadow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="5. По теме:" FontWeight="SemiBold" FontSize="16" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedTopic}" Height="40" FontSize="15" Padding="8,4" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
+                        <Button Grid.Column="2" Content="Начать по теме" Style="{StaticResource PrimaryButton}" Click="ByTopic_Click"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Button Grid.Row="2" Content="⚙ Настройки" Style="{StaticResource SecondaryButton}" Click="Settings_Click" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+        </Grid>
     </Grid>
 </Window>

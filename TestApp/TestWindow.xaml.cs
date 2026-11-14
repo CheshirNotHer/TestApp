@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using TestApp.Infrastructure;
 using TestApp.Models;
 using TestApp.ViewModels;
 
@@ -11,45 +12,37 @@ public partial class TestWindow : Window
     public TestWindow(TestParameters parameters)
     {
         InitializeComponent();
+        WindowHelper.FixMaximize(this);
         _parameters = parameters;
         SetDataContext(CreateViewModel());
     }
 
+    private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void Maximize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
     private TestViewModel CreateViewModel()
     {
-        // ВОТ ЗДЕСЬ мы передаем третьим аргументом App.Settings
         var questions = App.TestGenerator.Generate(_parameters, App.QuestionService.AllQuestions, App.Settings);
-
         if (questions.Count == 0)
-        {
-            MessageBox.Show("Нет валидных вопросов для выбранного режима.",
-                "Пустой тест", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
+            MessageBox.Show("Нет валидных вопросов для выбранного режима.", "Пустой тест", MessageBoxButton.OK, MessageBoxImage.Warning);
 
         var qvms = new System.Collections.Generic.List<QuestionViewModel>(questions.Count);
         for (int i = 0; i < questions.Count; i++)
-            qvms.Add(new QuestionViewModel(questions[i], i + 1,
-                App.QuestionService.ResolveImagePath(questions[i])));
+            qvms.Add(new QuestionViewModel(questions[i], i + 1, App.QuestionService.ResolveImagePath(questions[i])));
 
         var vm = new TestViewModel(qvms, _parameters);
         vm.RequestClose += Close;
-        vm.RequestRetry += () =>
-        {
-            var newVm = CreateViewModelForRetry();
-            SetDataContext(newVm);
-        };
+        vm.RequestRetry += () => SetDataContext(CreateViewModelForRetry());
         return vm;
     }
 
     private TestViewModel CreateViewModelForRetry()
     {
-        // И ВОТ ЗДЕСЬ тоже передаем App.Settings
         var questions = App.TestGenerator.Generate(_parameters, App.QuestionService.AllQuestions, App.Settings);
-
         var qvms = new System.Collections.Generic.List<QuestionViewModel>(questions.Count);
         for (int i = 0; i < questions.Count; i++)
-            qvms.Add(new QuestionViewModel(questions[i], i + 1,
-                App.QuestionService.ResolveImagePath(questions[i])));
+            qvms.Add(new QuestionViewModel(questions[i], i + 1, App.QuestionService.ResolveImagePath(questions[i])));
 
         var vm = new TestViewModel(qvms, _parameters);
         vm.RequestClose += Close;

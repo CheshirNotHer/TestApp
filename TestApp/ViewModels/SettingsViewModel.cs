@@ -33,12 +33,20 @@ public class SettingsViewModel : INotifyPropertyChanged
         set { _showExplanation = value; OnPropertyChanged(); }
     }
 
+    private bool _isDarkTheme;
+    public bool IsDarkTheme
+    {
+        get => _isDarkTheme;
+        set { _isDarkTheme = value; OnPropertyChanged(); }
+    }
+
     public SettingsViewModel()
     {
         TimedTestMinutes = App.Settings.TimedTestMinutes;
         TestQuestionCount = App.Settings.TestQuestionCount;
         ShuffleAnswers = App.Settings.ShuffleAnswers;
         ShowExplanationImmediately = App.Settings.ShowExplanationImmediately;
+        IsDarkTheme = App.Settings.Theme == "Dark";
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
