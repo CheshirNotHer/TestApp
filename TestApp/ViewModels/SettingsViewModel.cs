@@ -40,6 +40,20 @@ public class SettingsViewModel : INotifyPropertyChanged
         set { _isDarkTheme = value; OnPropertyChanged(); }
     }
 
+    private List<string> _availableTestFiles = new();
+    public List<string> AvailableTestFiles
+    {
+        get => _availableTestFiles;
+        set { _availableTestFiles = value; OnPropertyChanged(); }
+    }
+
+    private string _selectedTestFile;
+    public string SelectedTestFile
+    {
+        get => _selectedTestFile;
+        set { _selectedTestFile = value; OnPropertyChanged(); }
+    }
+
     public SettingsViewModel()
     {
         TimedTestMinutes = App.Settings.TimedTestMinutes;
@@ -47,6 +61,14 @@ public class SettingsViewModel : INotifyPropertyChanged
         ShuffleAnswers = App.Settings.ShuffleAnswers;
         ShowExplanationImmediately = App.Settings.ShowExplanationImmediately;
         IsDarkTheme = App.Settings.Theme == "Dark";
+
+        AvailableTestFiles = App.QuestionService.GetAvailableTestFiles();
+        SelectedTestFile = App.Settings.SelectedTestFile;
+
+        if (!AvailableTestFiles.Contains(SelectedTestFile) && AvailableTestFiles.Count > 0)
+        {
+            SelectedTestFile = AvailableTestFiles[0];
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

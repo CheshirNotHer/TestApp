@@ -20,26 +20,36 @@ public partial class App : Application
         SettingsService = new SettingsService();
         Settings = SettingsService.Load();
 
-        // НОВОЕ: Применяем сохраненную тему при запуске
+     
         ApplyTheme(Settings.Theme);
 
         QuestionService = new QuestionService();
         try
         {
-            QuestionService.Load();
+            QuestionService.Load(Settings.SelectedTestFile);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Не удалось загрузить questions.json:\n" + ex.Message,
-                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown();
-            return;
+            MessageBox.Show($"Не удалось загрузить файл {Settings.SelectedTestFile}:\n{ex.Message}\n\nЗагружен файл по умолчанию.",
+                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            try
+            {
+                Settings.SelectedTestFile = "questions.json";
+                QuestionService.Load("questions.json");
+            }
+            catch
+            {
+                MessageBox.Show("Файл questions.json также недоступен. Приложение будет закрыто.",
+                    "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+                return;
+            }
         }
 
         TestGenerator = new TestGenerator(new Random());
     }
 
-    // НОВЫЙ МЕТОД: Динамическая смена цветов
+    
     public static void ApplyTheme(string themeName)
     {
         bool isDark = themeName == "Dark";

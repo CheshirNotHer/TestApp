@@ -26,12 +26,27 @@ public partial class SettingsWindow : Window
             return;
         }
 
+        bool fileChanged = App.Settings.SelectedTestFile != _vm.SelectedTestFile;
+
+        if (fileChanged)
+        {
+            try
+            {
+                App.QuestionService.Load(_vm.SelectedTestFile);
+                App.Settings.SelectedTestFile = _vm.SelectedTestFile;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось загрузить выбранный файл теста:\n{ex.Message}",
+                    "Ошибка файла", MessageBoxButton.OK, MessageBoxImage.Error);
+                return; 
+            }
+        }
+
         App.Settings.TimedTestMinutes = _vm.TimedTestMinutes;
         App.Settings.TestQuestionCount = _vm.TestQuestionCount;
         App.Settings.ShuffleAnswers = _vm.ShuffleAnswers;
         App.Settings.ShowExplanationImmediately = _vm.ShowExplanationImmediately;
-
-        // НОВОЕ: Сохраняем и применяем тему
         App.Settings.Theme = _vm.IsDarkTheme ? "Dark" : "Light";
         App.ApplyTheme(App.Settings.Theme);
 

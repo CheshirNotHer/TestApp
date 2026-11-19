@@ -26,15 +26,26 @@ public partial class MainWindow : Window
 
     private void StartTest(TestParameters p)
     {
-        var test = new TestWindow(p) { Owner = this };
+        this.Hide(); 
+
+        var test = new TestWindow(p);
+
         test.ShowDialog();
+
+        this.Show(); 
         _vm.RefreshLabels();
     }
 
     private void OpenSettings()
     {
-        var win = new SettingsWindow { Owner = this };
+        this.Hide(); 
+
+        var win = new SettingsWindow(); 
+
         win.ShowDialog();
+
+        this.Show();
+        _vm.RefreshTopics();
         _vm.RefreshLabels();
     }
 

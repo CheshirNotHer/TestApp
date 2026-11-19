@@ -70,6 +70,25 @@ public class TestViewModel : INotifyPropertyChanged
     public int UnansweredCount => Questions.Count(q => !q.IsAnswered);
     public double Percent => TotalCount > 0 ? (double)CorrectCount / TotalCount * 100 : 0;
     public string PercentText => $"{Percent:F1}%";
+    public int Score
+    {
+        get
+        {
+            if (TotalCount == 0) return 2;
+            double p = Percent;
+
+            // Математика точно совпадает с вашим списком для 20 вопросов
+            if (p >= 100) return 10;
+            if (p >= 95) return 9;
+            if (p >= 90) return 8;
+            if (p >= 85) return 7;
+            if (p >= 80) return 6;
+            if (p >= 75) return 5;
+            if (p >= 70) return 4;
+            if (p >= 65) return 3;
+            return 2;
+        }
+    }
 
     public ICommand SelectOptionCommand { get; }
     public ICommand NextCommand { get; }
@@ -154,6 +173,7 @@ public class TestViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(UnansweredCount));
         OnPropertyChanged(nameof(Percent));
         OnPropertyChanged(nameof(PercentText));
+        OnPropertyChanged(nameof(Score));
         CommandManager.InvalidateRequerySuggested();
     }
 

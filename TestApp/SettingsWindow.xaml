@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="Настройки" Width="480" Height="480"
-        WindowStartupLocation="CenterOwner"
+        Title="Настройки" Width="480" Height="580"
+        WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         Background="{DynamicResource BgColor}" ResizeMode="NoResize">
 
@@ -38,7 +38,14 @@
 
             <StackPanel Grid.Row="0">
                 <Border Background="{DynamicResource CardBg}" CornerRadius="10" Padding="20" Effect="{StaticResource CardShadow}">
+                    
                     <StackPanel>
+                        <TextBlock Text="Файл с тестовыми заданиями:" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <ComboBox ItemsSource="{Binding AvailableTestFiles}" 
+                                  SelectedItem="{Binding SelectedTestFile}" 
+                                  Height="36" Margin="0,0,0,16"/>
+
+                        <Separator Margin="0,0,0,16" Background="{DynamicResource BorderColor}"/>
                         <TextBlock Text="Время теста с таймером (в минутах):" FontWeight="SemiBold" Margin="0,0,0,8"/>
                         <TextBox Text="{Binding TimedTestMinutes, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16"/>
 

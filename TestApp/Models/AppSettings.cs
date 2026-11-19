@@ -7,4 +7,5 @@ public class AppSettings
     public bool ShuffleAnswers { get; set; } = true; 
     public bool ShowExplanationImmediately { get; set; } = true;
     public string Theme { get; set; } = "Light";
+    public string SelectedTestFile { get; set; } = "questions.json";
 }
