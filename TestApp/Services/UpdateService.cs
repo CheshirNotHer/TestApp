@@ -7,67 +7,69 @@ namespace TestApp.Services;
 public class UpdateService
 {
     private const string AppName = "TestApp";
-    private const string GitHubOwner = "CheshirNotHer";
-    private const string GitHubRepo = "TestApp";
+    private const string GitHubOwner = "CheshirNotHer"; 
+    private const string GitHubRepo = "TestApp";      
 
-    public bool IsUpdateAvailable => Updater.Current?.Available != null;
-    public string? AvailableVersion => Updater.Current?.Available?.Version.ToString();
+    private Updater? _updater;
+
+    public bool IsUpdateAvailable => _updater?.Available != null;
+    public string? AvailableVersion => _updater?.Available?.Version.ToString();
 
     public async Task CheckForUpdatesDailyAsync()
     {
-        if (App.Settings.LastUpdateCheck.HasValue &&
-            (DateTime.Now - App.Settings.LastUpdateCheck.Value).TotalHours < 24)
-        {
-            return;
-        }
-
         try
         {
-            // Запускаем Updater (создаёт синглтон и запускает фоновую проверку)
-            var updater = Updater.Start(new UpdateOptions(AppName, new GitHubReleasesSource(GitHubOwner, GitHubRepo))
+            // Сохраняем ссылку на созданный updater
+            _updater = Updater.Start(new UpdateOptions(AppName, new GitHubReleasesSource(GitHubOwner, GitHubRepo))
             {
                 ExitApplication = () => App.Current.Dispatcher.Invoke(() => App.Current.Shutdown()),
                 Log = message => System.Diagnostics.Debug.WriteLine($"[Updater] {message}")
             });
 
-            // Явно дожидаемся завершения проверки
-            await updater.CheckAsync();
+            // Явно дожидаемся проверки
+            await _updater.CheckAsync();
 
-            // Сохраняем статус
             App.Settings.LastUpdateCheck = DateTime.Now;
             App.Settings.IsUpdateAvailable = IsUpdateAvailable;
             App.Settings.AvailableVersion = AvailableVersion;
             App.SettingsService.Save(App.Settings);
+
+            System.Diagnostics.Debug.WriteLine($"[Check] Update available: {IsUpdateAvailable}, Version: {AvailableVersion}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка проверки обновлений: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Check Error] {ex}");
         }
     }
 
     public async Task PerformUpdateAsync()
     {
-        if (!IsUpdateAvailable) return;
+        if (!IsUpdateAvailable || _updater == null)
+        {
+            System.Diagnostics.Debug.WriteLine("[Update] No update available or updater is null");
+            return;
+        }
 
         try
         {
-            var updater = Updater.Current;
-            if (updater == null) return;
+            System.Diagnostics.Debug.WriteLine("[Update] Starting download...");
+            await _updater.DownloadAsync();
+            System.Diagnostics.Debug.WriteLine("[Update] Download completed, applying...");
 
-            // 1. Скачиваем и проверяем обновление
-            await updater.DownloadAsync();
-
-            // 2. Применяем и перезапускаем приложение
-            updater.ApplyAndRestart();
+            // Применяем и перезапускаем приложение
+            _updater.ApplyAndRestart();
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Ошибка обновления: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Update Error] {ex}");
+            App.Current.Dispatcher.Invoke(() =>
+                System.Windows.MessageBox.Show($"Ошибка обновления: {ex.Message}", "Ошибка",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error));
         }
     }
 
     public void MarkHealthy()
     {
-        Updater.Current?.MarkHealthy();
+        _updater?.MarkHealthy();
     }
 }

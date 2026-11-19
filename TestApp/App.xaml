@@ -8,7 +8,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <infra:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
 
-        <!-- Базовые цвета (по умолчанию светлая тема) -->
+        <!-- Базовые цвета (по умолчанию светлая тема)  "#4F46E5"-->
         <SolidColorBrush x:Key="BgColor" Color="#F8FAFC"/>
         <SolidColorBrush x:Key="CardBg" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="PrimaryColor" Color="#4F46E5"/>

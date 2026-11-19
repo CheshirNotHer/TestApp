@@ -9,8 +9,8 @@
     {
       "rid": "win-x64",
       "file": "TestApp-win-x64.zip",
-      "sha256": "ХЕШ_ВАШЕГО_ZIP_АРХИВА",
-      "size": 12345678,
+      "sha256": "D9FE5B973D887AE684B38429788FF1FE765DBBAB5DE2EC3DC20C19B1806317BE",
+      "size": 273458,
       "executable": "TestApp.exe"
     }
   ]
