@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using TestApp.Infrastructure;
 
 namespace TestApp.ViewModels;
 
@@ -46,7 +48,9 @@ public class SettingsViewModel : INotifyPropertyChanged
         get => _availableTestFiles;
         set { _availableTestFiles = value; OnPropertyChanged(); }
     }
+    public bool CanUpdate => App.Settings.IsUpdateAvailable;
 
+    public ICommand UpdateCommand { get; }
     private string _selectedTestFile;
     public string SelectedTestFile
     {
@@ -69,6 +73,11 @@ public class SettingsViewModel : INotifyPropertyChanged
         {
             SelectedTestFile = AvailableTestFiles[0];
         }
+       
+        UpdateCommand = new RelayCommand(async () =>
+        {
+            await App.UpdateService.PerformUpdateAsync();
+        }, () => CanUpdate);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

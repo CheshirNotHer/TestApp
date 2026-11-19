@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using TestApp.Models;
 using TestApp.Services;
 
@@ -12,6 +14,7 @@ public partial class App : Application
     public static SettingsService SettingsService { get; private set; } = null!;
     public static AppSettings Settings { get; set; } = null!;
     public static TestGenerator TestGenerator { get; private set; } = null!;
+    public static UpdateService UpdateService { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -20,7 +23,6 @@ public partial class App : Application
         SettingsService = new SettingsService();
         Settings = SettingsService.Load();
 
-     
         ApplyTheme(Settings.Theme);
 
         QuestionService = new QuestionService();
@@ -47,9 +49,30 @@ public partial class App : Application
         }
 
         TestGenerator = new TestGenerator(new Random());
+
+        // 1. Инициализируем сервис обновлений
+        UpdateService = new UpdateService();
+
+        // 2. Запускаем проверку обновлений в фоновом потоке (не блокируя запуск)
+        Task.Run(async () =>
+        {
+            await UpdateService.CheckForUpdatesDailyAsync();
+        });
+
+        // 3. Безопасно подписываемся на событие загрузки главного окна
+        // Используем Dispatcher, чтобы дождаться, пока MainWindow будет создан
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            if (MainWindow != null)
+            {
+                MainWindow.Loaded += (s, args) =>
+                {
+                    UpdateService?.MarkHealthy();
+                };
+            }
+        }), DispatcherPriority.ApplicationIdle);
     }
 
-    
     public static void ApplyTheme(string themeName)
     {
         bool isDark = themeName == "Dark";
@@ -63,20 +86,20 @@ public partial class App : Application
 
         if (isDark)
         {
-            SetBrush("BgColor", "#0F172A");           // Темный фон окна
-            SetBrush("CardBg", "#1E293B");            // Фон карточек
-            SetBrush("TextMain", "#F1F5F9");          // Основной текст
-            SetBrush("TextMuted", "#94A3B8");         // Второстепенный текст
-            SetBrush("BorderColor", "#334155");       // Границы
-            SetBrush("PrimaryColor", "#6366F1");      // Акцент (синий)
+            SetBrush("BgColor", "#0F172A");
+            SetBrush("CardBg", "#1E293B");
+            SetBrush("TextMain", "#F1F5F9");
+            SetBrush("TextMuted", "#94A3B8");
+            SetBrush("BorderColor", "#334155");
+            SetBrush("PrimaryColor", "#6366F1");
             SetBrush("PrimaryHoverColor", "#4F46E5");
-            SetBrush("SuccessColor", "#34D399");      // Зеленый
-            SetBrush("SuccessBg", "#064E3B");         // Фон правильного ответа
-            SetBrush("ErrorColor", "#F87171");        // Красный
-            SetBrush("ErrorBg", "#7F1D1D");           // Фон неправильного
-            SetBrush("WindowButtonHover", "#334155"); // Ховер кнопок окна
-            SetBrush("TimerBg", "#451A03");           // Фон таймера
-            SetBrush("TimerText", "#FBBF24");         // Текст таймера
+            SetBrush("SuccessColor", "#34D399");
+            SetBrush("SuccessBg", "#064E3B");
+            SetBrush("ErrorColor", "#F87171");
+            SetBrush("ErrorBg", "#7F1D1D");
+            SetBrush("WindowButtonHover", "#334155");
+            SetBrush("TimerBg", "#451A03");
+            SetBrush("TimerText", "#FBBF24");
         }
         else
         {

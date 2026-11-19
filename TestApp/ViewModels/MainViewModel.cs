@@ -20,6 +20,22 @@ public class MainViewModel : INotifyPropertyChanged
         set { _selectedTopic = value; OnPropertyChanged(); }
     }
 
+    private bool _isUpdateAvailable;
+    public bool IsUpdateAvailable
+    {
+        get => App.Settings.IsUpdateAvailable;
+        set { _isUpdateAvailable = value; OnPropertyChanged(); }
+    }
+
+    public string UpdateBannerText =>
+        $"Доступна новая версия {App.Settings.AvailableVersion}! Обновите приложение в настройках.";
+
+    public void RefreshUpdateStatus()
+    {
+        OnPropertyChanged(nameof(IsUpdateAvailable));
+        OnPropertyChanged(nameof(UpdateBannerText));
+    }
+
     public string QuestionCountText =>
         $"Всего валидных вопросов: {App.QuestionService.AllQuestions.Count}";
     public string TimedMinutesText =>

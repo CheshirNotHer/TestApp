@@ -18,6 +18,11 @@ public partial class MainWindow : Window
         _vm.RefreshLabels();
         _vm.RequestStartTest += StartTest;
         _vm.RequestOpenSettings += OpenSettings;
+        Task.Run(async () =>
+        {
+            await App.UpdateService.CheckForUpdatesDailyAsync();
+            Dispatcher.Invoke(() => _vm.RefreshUpdateStatus());
+        });
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

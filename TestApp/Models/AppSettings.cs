@@ -8,4 +8,7 @@ public class AppSettings
     public bool ShowExplanationImmediately { get; set; } = true;
     public string Theme { get; set; } = "Light";
     public string SelectedTestFile { get; set; } = "questions.json";
+    public DateTime? LastUpdateCheck { get; set; }
+    public bool IsUpdateAvailable { get; set; }
+    public string? AvailableVersion { get; set; }
 }

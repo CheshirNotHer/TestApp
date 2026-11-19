@@ -1,0 +1,17 @@
+{
+  "name": "TestApp",
+  "version": "0.9.1",
+  "commit": "abc1234",
+  "channel": "stable",
+  "publishedAt": "2026-11-19T12:00:00Z",
+  "notesUrl": "https://github.com/CheshirNotHer/TestApp/releases/tag/v0.9.1",
+  "assets": [
+    {
+      "rid": "win-x64",
+      "file": "TestApp-win-x64.zip",
+      "sha256": "ХЕШ_ВАШЕГО_ZIP_АРХИВА",
+      "size": 12345678,
+      "executable": "TestApp.exe"
+    }
+  ]
+}
