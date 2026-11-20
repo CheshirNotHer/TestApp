@@ -96,6 +96,7 @@ public class TestViewModel : INotifyPropertyChanged
     public ICommand FinishCommand { get; }
     public ICommand RetryCommand { get; }
     public ICommand BackToMenuCommand { get; }
+    public ICommand SkipCommand { get; }
 
     public event Action? RequestClose;
     public event Action? RequestRetry;
@@ -114,6 +115,8 @@ public class TestViewModel : INotifyPropertyChanged
         RetryCommand = new RelayCommand(() => RequestRetry?.Invoke());
         BackToMenuCommand = new RelayCommand(() => RequestClose?.Invoke());
 
+        SkipCommand = new RelayCommand(Skip, () => !IsLastQuestion && CurrentQuestion != null && !CurrentQuestion.IsAnswered);
+        
         if (IsTimed && App.Settings.TimedTestMinutes > 0)
         {
             TimeRemaining = TimeSpan.FromMinutes(App.Settings.TimedTestMinutes);
@@ -142,6 +145,23 @@ public class TestViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(AnsweredCount));
         OnPropertyChanged(nameof(CorrectCount));
         OnPropertyChanged(nameof(CanGoNext));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void Skip()
+    {
+        var q = CurrentQuestion;
+        if (q == null) return;
+
+        Questions.RemoveAt(CurrentIndex);
+
+        Questions.Add(q);
+
+        OnPropertyChanged(nameof(CurrentQuestion));
+        OnPropertyChanged(nameof(CanGoBack));
+        OnPropertyChanged(nameof(CanGoNext));
+        OnPropertyChanged(nameof(IsLastQuestion));
+        OnPropertyChanged(nameof(ProgressText));
         CommandManager.InvalidateRequerySuggested();
     }
 
