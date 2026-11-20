@@ -19,14 +19,14 @@ public class UpdateService
     {
         try
         {
-            // Сохраняем ссылку на созданный updater
+            
             _updater = Updater.Start(new UpdateOptions(AppName, new GitHubReleasesSource(GitHubOwner, GitHubRepo))
             {
                 ExitApplication = () => App.Current.Dispatcher.Invoke(() => App.Current.Shutdown()),
                 Log = message => System.Diagnostics.Debug.WriteLine($"[Updater] {message}")
             });
 
-            // Явно дожидаемся проверки
+           
             await _updater.CheckAsync();
 
             App.Settings.LastUpdateCheck = DateTime.Now;
@@ -56,7 +56,6 @@ public class UpdateService
             await _updater.DownloadAsync();
             System.Diagnostics.Debug.WriteLine("[Update] Download completed, applying...");
 
-            // Применяем и перезапускаем приложение
             _updater.ApplyAndRestart();
         }
         catch (Exception ex)
