@@ -8,7 +8,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <infra:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
 
-        <!-- Базовые цвета (по умолчанию светлая тема)  "#4F46E5"-->
+        <!-- Базовые цвета (по умолчанию светлая тема) -->
         <SolidColorBrush x:Key="BgColor" Color="#F8FAFC"/>
         <SolidColorBrush x:Key="CardBg" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="PrimaryColor" Color="#4F46E5"/>
@@ -23,6 +23,9 @@
         <SolidColorBrush x:Key="WindowButtonHover" Color="#E2E8F0"/>
         <SolidColorBrush x:Key="TimerBg" Color="#FEF3C7"/>
         <SolidColorBrush x:Key="TimerText" Color="#D97706"/>
+        <SolidColorBrush x:Key="WarningBg" Color="#FEF3C7"/>
+        <SolidColorBrush x:Key="WarningText" Color="#92400E"/>
+        <SolidColorBrush x:Key="WarningBorder" Color="#F59E0B"/>
 
         <DropShadowEffect x:Key="CardShadow" BlurRadius="15" ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.05"/>
 

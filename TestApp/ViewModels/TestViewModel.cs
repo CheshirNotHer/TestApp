@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TestApp.Infrastructure;
@@ -77,7 +78,6 @@ public class TestViewModel : INotifyPropertyChanged
             if (TotalCount == 0) return 2;
             double p = Percent;
 
-            // Математика точно совпадает с вашим списком для 20 вопросов
             if (p >= 100) return 10;
             if (p >= 95) return 9;
             if (p >= 90) return 8;
@@ -111,12 +111,14 @@ public class TestViewModel : INotifyPropertyChanged
         SelectOptionCommand = new RelayCommand<OptionViewModel>(SelectOption);
         NextCommand = new RelayCommand(Next, () => CanGoNext);
         BackCommand = new RelayCommand(Back, () => CanGoBack);
-        FinishCommand = new RelayCommand(() => Finish(), () => CanGoNext && IsLastQuestion);
+        FinishCommand = new RelayCommand(TryFinish, () => IsLastQuestion && !IsFinished);
         RetryCommand = new RelayCommand(() => RequestRetry?.Invoke());
         BackToMenuCommand = new RelayCommand(() => RequestClose?.Invoke());
 
-        SkipCommand = new RelayCommand(Skip, () => !IsLastQuestion && CurrentQuestion != null && !CurrentQuestion.IsAnswered);
-        
+        SkipCommand = new RelayCommand(
+            Skip,
+            () => !IsLastQuestion && CurrentQuestion != null && !CurrentQuestion.IsAnswered);
+
         if (IsTimed && App.Settings.TimedTestMinutes > 0)
         {
             TimeRemaining = TimeSpan.FromMinutes(App.Settings.TimedTestMinutes);
@@ -132,7 +134,7 @@ public class TestViewModel : INotifyPropertyChanged
         if (TimeRemaining <= TimeSpan.Zero)
         {
             TimeRemaining = TimeSpan.Zero;
-            Finish();
+            ForceFinish();
         }
     }
 
@@ -145,6 +147,7 @@ public class TestViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(AnsweredCount));
         OnPropertyChanged(nameof(CorrectCount));
         OnPropertyChanged(nameof(CanGoNext));
+        OnPropertyChanged(nameof(UnansweredCount));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -153,10 +156,11 @@ public class TestViewModel : INotifyPropertyChanged
         var q = CurrentQuestion;
         if (q == null) return;
 
+        // Переносим текущий вопрос в конец
         Questions.RemoveAt(CurrentIndex);
-
         Questions.Add(q);
 
+        // Текущим становится следующий вопрос (тот, что оказался на месте CurrentIndex)
         OnPropertyChanged(nameof(CurrentQuestion));
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(CanGoNext));
@@ -168,7 +172,7 @@ public class TestViewModel : INotifyPropertyChanged
     private void Next()
     {
         if (!CanGoNext) return;
-        if (IsLastQuestion) { Finish(); return; }
+        if (IsLastQuestion) { TryFinish(); return; }
         CurrentIndex++;
     }
 
@@ -178,16 +182,51 @@ public class TestViewModel : INotifyPropertyChanged
         CurrentIndex--;
     }
 
-    private void Finish()
+    /// <summary>
+    /// Попытка завершения теста: если есть неотвеченные вопросы — переходим на первый
+    /// неотвеченный и показываем сообщение. Если все отвечены — финишируем.
+    /// </summary>
+    private void TryFinish()
+    {
+        if (IsFinished) return;
+
+        if (AnsweredCount < TotalCount)
+        {
+            for (int i = 0; i < Questions.Count; i++)
+            {
+                if (!Questions[i].IsAnswered)
+                {
+                    CurrentIndex = i;
+                    break;
+                }
+            }
+
+            MessageBox.Show(
+                $"Осталось неотвеченных вопросов: {UnansweredCount}.\nОтветьте на все вопросы, чтобы завершить тест.",
+                "Не все вопросы отвечены",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        ForceFinish();
+    }
+
+    /// <summary>
+    /// Принудительное завершение (по таймеру или когда все вопросы отвечены).
+    /// </summary>
+    private void ForceFinish()
     {
         if (IsFinished) return;
         _timer?.Stop();
         _timer = null;
 
+        // Подсвечиваем правильные ответы на неотвеченные (для таймера)
         foreach (var q in Questions.Where(q => !q.IsAnswered))
             q.RevealAnswer();
 
         IsFinished = true;
+        OnPropertyChanged(nameof(AnsweredCount));
         OnPropertyChanged(nameof(CorrectCount));
         OnPropertyChanged(nameof(IncorrectCount));
         OnPropertyChanged(nameof(UnansweredCount));

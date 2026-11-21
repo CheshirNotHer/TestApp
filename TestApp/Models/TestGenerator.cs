@@ -11,9 +11,8 @@ public class TestGenerator
 
     public List<Question> Generate(TestParameters p, List<Question> all, AppSettings settings)
     {
-        int count = settings.TestQuestionCount;
+        int count = settings.GetQuestionCount(p.Mode);
 
-        // 1. Выбираем вопросы
         var selected = p.Mode switch
         {
             TestMode.All => Shuffle(all),
@@ -24,17 +23,16 @@ public class TestGenerator
             _ => new List<Question>()
         };
 
-        // 2. Перемешиваем ответы (если включено)
         if (settings.ShuffleAnswers)
-        {
-            selected = selected.Select(q => CloneAndShuffleOptions(q)).ToList();
-        }
+            selected = selected.Select(CloneAndShuffleOptions).ToList();
 
         return selected;
     }
 
     private List<Question> UniformByTopic(List<Question> all, int target)
     {
+        if (target <= 0) return new List<Question>();
+
         var groups = all.GroupBy(q => q.Topic).ToList();
         if (groups.Count == 0) return new List<Question>();
 
@@ -70,7 +68,6 @@ public class TestGenerator
 
     private Question CloneAndShuffleOptions(Question original)
     {
-        // Создаем копию, чтобы не менять исходный список вопросов в памяти
         var cloned = new Question
         {
             Id = original.Id,
@@ -85,7 +82,6 @@ public class TestGenerator
         var correctOption = cloned.Options[cloned.CorrectIndex];
         cloned.Options = Shuffle(cloned.Options);
         cloned.CorrectIndex = cloned.Options.IndexOf(correctOption);
-
         return cloned;
     }
 

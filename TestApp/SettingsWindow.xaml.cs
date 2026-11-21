@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using TestApp.Infrastructure;
 using TestApp.ViewModels;
 
@@ -20,9 +21,10 @@ public partial class SettingsWindow : Window
 
     private void Save_Click(object s, RoutedEventArgs e)
     {
-        if (_vm.TimedTestMinutes <= 0 || _vm.TestQuestionCount <= 0)
+        var error = _vm.Validate();
+        if (error != null)
         {
-            MessageBox.Show("Укажите положительные числа для времени и количества вопросов.", "Проверка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(error, "Проверка", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -39,12 +41,14 @@ public partial class SettingsWindow : Window
             {
                 MessageBox.Show($"Не удалось загрузить выбранный файл теста:\n{ex.Message}",
                     "Ошибка файла", MessageBoxButton.OK, MessageBoxImage.Error);
-                return; 
+                return;
             }
         }
 
         App.Settings.TimedTestMinutes = _vm.TimedTestMinutes;
-        App.Settings.TestQuestionCount = _vm.TestQuestionCount;
+        App.Settings.UniformQuestionCount = _vm.UniformQuestionCount;
+        App.Settings.RandomQuestionCount = _vm.RandomQuestionCount;
+        App.Settings.TimedUniformQuestionCount = _vm.TimedUniformQuestionCount;
         App.Settings.ShuffleAnswers = _vm.ShuffleAnswers;
         App.Settings.ShowExplanationImmediately = _vm.ShowExplanationImmediately;
         App.Settings.Theme = _vm.IsDarkTheme ? "Dark" : "Light";

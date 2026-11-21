@@ -47,12 +47,17 @@
                 <TextBlock Text="Выберите режим для начала проверки знаний" FontSize="16" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0"/>
                 <TextBlock Text="{Binding QuestionCountText}" FontSize="13" Foreground="{DynamicResource PrimaryColor}" FontWeight="SemiBold" Margin="0,12,0,0"/>
                 <!-- Баннер обновления -->
-                <Border Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1" 
+                <!-- Баннер обновления -->
+                <Border Background="{DynamicResource WarningBg}"
+        BorderBrush="{DynamicResource WarningBorder}"
+        BorderThickness="1"
         CornerRadius="8" Padding="15,10" Margin="0,0,0,20"
         Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVis}}">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Left" Text="✨" FontSize="20" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBlock Text="{Binding UpdateBannerText}" Foreground="#92400E" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding UpdateBannerText}"
+                   Foreground="{DynamicResource WarningText}"
+                   FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </DockPanel>
                 </Border>
             </StackPanel>
@@ -115,6 +120,7 @@
             </Grid>
 
             <Button Grid.Row="2" Content="⚙ Настройки" Style="{StaticResource SecondaryButton}" Click="Settings_Click" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+       
         </Grid>
     </Grid>
 </Window>

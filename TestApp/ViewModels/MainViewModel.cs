@@ -8,9 +8,19 @@ namespace TestApp.ViewModels;
 
 public class MainViewModel : INotifyPropertyChanged
 {
-    public string UniformButtonText => $"2. {App.Settings.TestQuestionCount} вопросов равномерно по темам";
-    public string RandomButtonText => $"3. {App.Settings.TestQuestionCount} случайных вопросов";
-    public string TimedButtonText => $"4. {App.Settings.TestQuestionCount} вопросов равномерно (с таймером)";
+    public MainViewModel()
+    {
+        if (App.UpdateService != null)
+            App.UpdateService.UpdateStatusChanged += RefreshUpdateStatus;
+    }
+
+    public string UniformButtonText =>
+        $"2. {App.Settings.UniformQuestionCount} вопросов равномерно по темам";
+    public string RandomButtonText =>
+        $"3. {App.Settings.RandomQuestionCount} случайных вопросов";
+    public string TimedButtonText =>
+        $"4. {App.Settings.TimedUniformQuestionCount} вопросов равномерно (с таймером)";
+
     public ObservableCollection<string> Topics { get; } = new();
 
     private string? _selectedTopic;
@@ -20,15 +30,10 @@ public class MainViewModel : INotifyPropertyChanged
         set { _selectedTopic = value; OnPropertyChanged(); }
     }
 
-    private bool _isUpdateAvailable;
-    public bool IsUpdateAvailable
-    {
-        get => App.Settings.IsUpdateAvailable;
-        set { _isUpdateAvailable = value; OnPropertyChanged(); }
-    }
+    public bool IsUpdateAvailable => App.Settings.IsUpdateAvailable;
 
     public string UpdateBannerText =>
-        $"Доступна новая версия {App.Settings.AvailableVersion}! Обновите приложение в настройках.";
+        $"Доступна новая версия {App.Settings.AvailableVersion}! Откройте настройки, чтобы обновиться.";
 
     public void RefreshUpdateStatus()
     {
@@ -55,8 +60,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         OnPropertyChanged(nameof(QuestionCountText));
         OnPropertyChanged(nameof(TimedMinutesText));
-        OnPropertyChanged(nameof(UniformButtonText)); 
-        OnPropertyChanged(nameof(RandomButtonText));  
+        OnPropertyChanged(nameof(UniformButtonText));
+        OnPropertyChanged(nameof(RandomButtonText));
         OnPropertyChanged(nameof(TimedButtonText));
     }
 
@@ -64,6 +69,7 @@ public class MainViewModel : INotifyPropertyChanged
     public void StartUniform() => RequestStartTest?.Invoke(new TestParameters { Mode = TestMode.Uniform });
     public void StartRandom() => RequestStartTest?.Invoke(new TestParameters { Mode = TestMode.Random });
     public void StartTimed() => RequestStartTest?.Invoke(new TestParameters { Mode = TestMode.TimedUniform });
+
     public void StartByTopic()
     {
         if (!string.IsNullOrEmpty(SelectedTopic))
@@ -73,6 +79,7 @@ public class MainViewModel : INotifyPropertyChanged
                 Topic = SelectedTopic
             });
     }
+
     public void OpenSettings() => RequestOpenSettings?.Invoke();
 
     public event PropertyChangedEventHandler? PropertyChanged;

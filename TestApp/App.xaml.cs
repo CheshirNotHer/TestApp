@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Media.Effects;
 using TestApp.Models;
 using TestApp.Services;
 
@@ -38,6 +38,7 @@ public partial class App : Application
             {
                 Settings.SelectedTestFile = "questions.json";
                 QuestionService.Load("questions.json");
+                SettingsService.Save(Settings); // сохраняем фолбэк
             }
             catch
             {
@@ -49,17 +50,14 @@ public partial class App : Application
         }
 
         TestGenerator = new TestGenerator(new Random());
-
-        // 1. Инициализируем сервис обновлений
         UpdateService = new UpdateService();
 
-        // 2. Запускаем проверку обновлений в фоновом потоке (не блокируя запуск)
-        Task.Run(async () =>
+        // Единственная точка запуска фоновой проверки обновлений.
+        _ = Task.Run(async () =>
         {
-            await UpdateService.CheckForUpdatesDailyAsync();
+            try { await UpdateService.CheckForUpdatesDailyAsync(); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Update] {ex}"); }
         });
-
-        
     }
 
     public static void ApplyTheme(string themeName)
@@ -89,6 +87,9 @@ public partial class App : Application
             SetBrush("WindowButtonHover", "#334155");
             SetBrush("TimerBg", "#451A03");
             SetBrush("TimerText", "#FBBF24");
+            SetBrush("WarningBg", "#422006");
+            SetBrush("WarningText", "#FCD34D");
+            SetBrush("WarningBorder", "#B45309");
         }
         else
         {
@@ -106,6 +107,13 @@ public partial class App : Application
             SetBrush("WindowButtonHover", "#E2E8F0");
             SetBrush("TimerBg", "#FEF3C7");
             SetBrush("TimerText", "#D97706");
+            SetBrush("WarningBg", "#FEF3C7");
+            SetBrush("WarningText", "#92400E");
+            SetBrush("WarningBorder", "#F59E0B");
         }
+
+        // Тень карточек — сильнее в тёмной теме, иначе не видна
+        var shadow = (DropShadowEffect)Application.Current.Resources["CardShadow"];
+        shadow.Opacity = isDark ? 0.25 : 0.05;
     }
 }

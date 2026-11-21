@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using TestApp.Infrastructure;
 using TestApp.Models;
 using TestApp.ViewModels;
@@ -18,11 +19,6 @@ public partial class MainWindow : Window
         _vm.RefreshLabels();
         _vm.RequestStartTest += StartTest;
         _vm.RequestOpenSettings += OpenSettings;
-        Task.Run(async () =>
-        {
-            await App.UpdateService.CheckForUpdatesDailyAsync();
-            Dispatcher.Invoke(() => _vm.RefreshUpdateStatus());
-        });
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -31,27 +27,18 @@ public partial class MainWindow : Window
 
     private void StartTest(TestParameters p)
     {
-        this.Hide(); 
-
-        var test = new TestWindow(p);
-
-        test.ShowDialog();
-
-        this.Show(); 
-        _vm.RefreshLabels();
+        this.Hide();
+        try { new TestWindow(p).ShowDialog(); }
+        catch (Exception ex) { MessageBox.Show($"Не удалось запустить тест:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        finally { this.Show(); _vm.RefreshLabels(); }
     }
 
     private void OpenSettings()
     {
-        this.Hide(); 
-
-        var win = new SettingsWindow(); 
-
-        win.ShowDialog();
-
-        this.Show();
-        _vm.RefreshTopics();
-        _vm.RefreshLabels();
+        this.Hide();
+        try { new SettingsWindow().ShowDialog(); }
+        catch (Exception ex) { MessageBox.Show($"Не удалось открыть настройки:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        finally { this.Show(); _vm.RefreshTopics(); _vm.RefreshLabels(); }
     }
 
     private void All_Click(object s, RoutedEventArgs e) => _vm.StartAll();

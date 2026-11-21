@@ -100,9 +100,21 @@
                         <Button Content="← Назад" Style="{StaticResource SecondaryButton}" Command="{Binding BackCommand}" 
                                 Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVis}}" Margin="0,0,12,0"/>
 
-                        <!-- Кнопка Пропустить с иконкой -->
-                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding SkipCommand}" 
-                                Visibility="{Binding IsLastQuestion, Converter={StaticResource InvBoolToVis}}" Margin="0,0,12,0">
+                        <!-- Кнопка Пропустить: скрыта на последнем вопросе и у отвеченного -->
+                        <Button Command="{Binding SkipCommand}" Margin="0,0,12,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLastQuestion}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding CurrentQuestion.IsAnswered}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Пропустить" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <Path Data="M 0,0 L 6,5 L 0,10 Z M 7,0 L 13,5 L 7,10 Z" 
@@ -128,7 +140,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Верхняя панель (заголовок вместо кнопок) -->
+                <!-- Верхняя панель -->
                 <Border Grid.Row="0" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" Padding="30,16">
                     <TextBlock Text="Результаты теста" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}"/>
                 </Border>
@@ -146,14 +158,12 @@
 
                                 <!-- Два круга: процент и балл -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <!-- Круг с процентом -->
                                     <Grid Width="120" Height="120" Margin="0,0,20,0">
                                         <Ellipse Fill="{DynamicResource BgColor}" Stroke="{DynamicResource BorderColor}" StrokeThickness="8"/>
                                         <TextBlock Text="{Binding PercentText}" FontSize="24" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryColor}"/>
                                     </Grid>
 
-                                    <!-- Круг с баллом -->
                                     <Grid Width="120" Height="120">
                                         <Ellipse Fill="{DynamicResource BgColor}" Stroke="{DynamicResource BorderColor}" StrokeThickness="8"/>
                                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
