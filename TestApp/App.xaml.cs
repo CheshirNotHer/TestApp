@@ -59,18 +59,7 @@ public partial class App : Application
             await UpdateService.CheckForUpdatesDailyAsync();
         });
 
-        // 3. Безопасно подписываемся на событие загрузки главного окна
-        // Используем Dispatcher, чтобы дождаться, пока MainWindow будет создан
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            if (MainWindow != null)
-            {
-                MainWindow.Loaded += (s, args) =>
-                {
-                    UpdateService?.MarkHealthy();
-                };
-            }
-        }), DispatcherPriority.ApplicationIdle);
+        
     }
 
     public static void ApplyTheme(string themeName)
