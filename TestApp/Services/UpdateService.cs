@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace TestApp.Services;
@@ -31,13 +30,28 @@ public class UpdateService
 
     public async Task CheckForUpdatesDailyAsync()
     {
-        if (App.Settings.LastUpdateCheck.HasValue &&
-            (DateTime.Now - App.Settings.LastUpdateCheck.Value).TotalHours < 24)
+        var currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        var currentVersionStr = $"{currentVersion!.Major}.{currentVersion.Minor}.{currentVersion.Build}";
+
+        // Если в настройках записано обновление, но текущая версия программы уже >= сохраненной — сбрасываем
+        if (App.Settings.IsUpdateAvailable &&
+            Version.TryParse(App.Settings.AvailableVersion, out var cachedVer) &&
+            Version.TryParse(currentVersionStr, out var localVerCheck) &&
+            localVerCheck >= cachedVer)
         {
-            IsUpdateAvailable = App.Settings.IsUpdateAvailable;
+            App.Settings.IsUpdateAvailable = false;
+            App.Settings.AvailableVersion = null;
+            App.SettingsService.Save(App.Settings);
+        }
+
+        // Если ранее уже находили обновление — сразу показываем баннер, пока идёт проверка в фоне
+        if (App.Settings.IsUpdateAvailable && !string.IsNullOrEmpty(App.Settings.AvailableVersion))
+        {
+            IsUpdateAvailable = true;
             AvailableVersion = App.Settings.AvailableVersion;
+            string cachedTag = $"v{App.Settings.AvailableVersion}";
+            _downloadUrl = $"https://github.com/{GitHubOwner}/{GitHubRepo}/releases/download/{cachedTag}/TestApp-win-{cachedTag}.zip";
             UpdateStatusChanged?.Invoke();
-            return;
         }
 
         try
@@ -45,35 +59,31 @@ public class UpdateService
             using var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("TestApp", "1.0"));
 
-            var url = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";
-            var response = await client.GetAsync(url);
+            var response = await client.GetAsync(
+                $"https://github.com/{GitHubOwner}/{GitHubRepo}/releases/latest",
+                HttpCompletionOption.ResponseHeadersRead);
+
             if (!response.IsSuccessStatusCode) return;
 
-            var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            string tag = root.GetProperty("tag_name").GetString() ?? "";
+            // Итоговый URL после редиректа: https://github.com/CheshirNotHer/TestApp/releases/tag/v0.9.3
+            string finalUrl = response.RequestMessage?.RequestUri?.ToString() ?? "";
+            string tag = finalUrl.Split('/')[^1]; // например, "v0.9.3"
             string cleanVersion = tag.TrimStart('v', 'V');
-
-            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            var currentVersionStr = $"{currentVersion!.Major}.{currentVersion.Minor}.{currentVersion.Build}";
 
             if (Version.TryParse(cleanVersion, out var remoteVer) &&
                 Version.TryParse(currentVersionStr, out var localVer) &&
                 remoteVer > localVer)
             {
-                foreach (var asset in root.GetProperty("assets").EnumerateArray())
-                {
-                    string name = asset.GetProperty("name").GetString() ?? "";
-                    if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
-                        IsUpdateAvailable = true;
-                        AvailableVersion = cleanVersion;
-                        break;
-                    }
-                }
+                // Подставляем динамический tag в имя архива: TestApp-win-x64-v0.9.3.zip
+                _downloadUrl = $"https://github.com/{GitHubOwner}/{GitHubRepo}/releases/download/{tag}/TestApp-win-{tag}.zip";
+                IsUpdateAvailable = true;
+                AvailableVersion = cleanVersion;
+            }
+            else
+            {
+                IsUpdateAvailable = false;
+                AvailableVersion = null;
+                _downloadUrl = string.Empty;
             }
 
             App.Settings.LastUpdateCheck = DateTime.Now;
@@ -88,6 +98,7 @@ public class UpdateService
             Debug.WriteLine($"[Update Check Error] {ex.Message}");
         }
     }
+
 
     private static bool HasWriteAccessToAppDirectory()
     {
@@ -175,7 +186,12 @@ del ""%~f0""
 ";
             await File.WriteAllTextAsync(batPath, batContent);
 
-            // 4. Запуск обновления и выход
+            // 4. Сброс флага обновления, запуск скрипта и выход
+            App.Settings.IsUpdateAvailable = false;
+            App.Settings.AvailableVersion = null;
+            App.Settings.LastUpdateCheck = DateTime.Now;
+            App.SettingsService.Save(App.Settings);
+
             progress?.Report(new UpdateProgress { Stage = "Установка…", Percent = 100 });
             Process.Start(new ProcessStartInfo
             {

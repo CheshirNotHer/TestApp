@@ -113,7 +113,16 @@ public partial class App : Application
         }
 
         // Тень карточек — сильнее в тёмной теме, иначе не видна
-        var shadow = (DropShadowEffect)Application.Current.Resources["CardShadow"];
-        shadow.Opacity = isDark ? 0.25 : 0.05;
+        var shadow = new DropShadowEffect
+        {
+            BlurRadius = 15,
+            ShadowDepth = 2,
+            Direction = 270,
+            Color = Colors.Black,
+            Opacity = isDark ? 0.25 : 0.05
+        };
+        shadow.Freeze();
+        Application.Current.Resources["CardShadow"] = shadow;
+       
     }
 }

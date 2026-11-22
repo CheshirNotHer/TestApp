@@ -17,6 +17,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+
         <Grid Grid.Row="0" Background="Transparent">
             <TextBlock Text="Настройки тестирования" Margin="16,0,0,0" VerticalAlignment="Center"
                        FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
@@ -49,7 +50,7 @@
 
                         <Separator Margin="0,0,0,16" Background="{DynamicResource BorderColor}"/>
 
-                        <TextBlock Text="Время теста с таймером (в минутах):" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <TextBlock  Text="Время теста с таймером (в минутах):" FontWeight="SemiBold" Margin="0,0,0,8"/>
                         <TextBox Text="{Binding TimedTestMinutes, UpdateSourceTrigger=PropertyChanged}"
                                  Width="120" HorizontalAlignment="Left" Margin="0,0,0,16"/>
 
@@ -62,7 +63,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Режим 2 — равномерно по темам:" VerticalAlignment="Center"/>
+                            <TextBlock FontSize="15"  Grid.Column="0" Text="Режим 2 — равномерно по темам:" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1" Text="{Binding UniformQuestionCount, UpdateSourceTrigger=PropertyChanged}"/>
                         </Grid>
 
@@ -71,7 +72,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Режим 3 — случайные вопросы:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="0" FontSize="15"  Text="Режим 3 — случайные вопросы:" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1" Text="{Binding RandomQuestionCount, UpdateSourceTrigger=PropertyChanged}"/>
                         </Grid>
 
@@ -80,13 +81,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Режим 4 — с таймером:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="0" FontSize="15"  Text="Режим 4 — с таймером:" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1" Text="{Binding TimedUniformQuestionCount, UpdateSourceTrigger=PropertyChanged}"/>
                         </Grid>
 
                         <Separator Margin="0,0,0,16" Background="{DynamicResource BorderColor}"/>
 
-                        <CheckBox Content="Перемешивать варианты ответов" IsChecked="{Binding ShuffleAnswers}" Margin="0,0,0,12"/>
+                        <CheckBox  Content="Перемешивать варианты ответов" IsChecked="{Binding ShuffleAnswers}" Margin="0,0,0,12"/>
                         <CheckBox Content="Показывать пояснение сразу после ответа" IsChecked="{Binding ShowExplanationImmediately}" Margin="0,0,0,12"/>
 
                         <Separator Margin="0,0,0,16" Background="{DynamicResource BorderColor}"/>
@@ -106,7 +107,7 @@
                Foreground="{DynamicResource TextMuted}" Margin="0,0,0,6"/>
                             <ProgressBar Height="8"
                  Minimum="0" Maximum="100"
-                 Value="{Binding UpdatePercent}"
+                 Value="{Binding UpdatePercent, Mode=OneWay}"
                  IsIndeterminate="{Binding UpdateIsIndeterminate}"/>
                         </StackPanel>
                     </StackPanel>
